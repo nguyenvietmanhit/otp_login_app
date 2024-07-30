@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Otp;
-use App\Models\User;
+use App\Models\CustomerOtp;
+use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,20 +27,40 @@ class OtpController extends Controller
             'phone.regex' => 'Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return redirect()->back()->withErrors(['email' => 'Email not found']);
+        $ip_address = $request->ip();
+        // Check rate-limiting
+        $limit = 115; // Max OPT requests per hour
+        $count = CustomerOtp::where('ip_address', $ip_address)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(30))
+            ->count();
+
+        if ($count >= $limit) {
+            return redirect()->back()->withErrors(['message' => "Bạn đã thực hiện quá $limit đăng nhập cho phép trong 30p. Vui lòng thử lại sau 30p nữa"]);
         }
 
-        $otp = rand(10000, 99999);
+        $phone = $request->phone;
 
-        Otp::create([
-            'user_id' => $user->id,
-            'otp' => $otp,
-            'expires_at' => Carbon::now()->addMinutes(10)
-        ]);
+        // Check trong bảng customer_otps xem đã tồn tại OTP hay chưa
+        $customer_otp = CustomerOtp::where('phone', $phone)->first();
+        if (!$customer_otp) {
+            // Giả lập otp, sau cần lấy từ API
+            $otp = rand(10000, 99999);
+            CustomerOtp::create([
+                'phone' => $phone,
+                'otp' => $otp,
+                'ip_address' => $ip_address,
+                'expires_at' => Carbon::now()->addMinutes(30)
+            ]);
+        }
 
-        return redirect()->route('otp.verify')->with('email', $request->email);
+
+
+//        $customer = Customer::where('email', $request->email)->first();
+//        if (!$customer) {
+//            return redirect()->back()->withErrors(['email' => 'Email not found']);
+//        }
+//
+        return redirect()->route('otp.verify')->with('phone', $phone);
     }
 
     public function showOtpForm()
@@ -55,18 +75,18 @@ class OtpController extends Controller
             'otp' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $customer = Customer::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (!$customer) {
             return redirect()->back()->withErrors(['email' => 'Email not found.']);
         }
 
-        $otp = Otp::where('user_id', $user->id)
+        $otp = CustomerOtp::where('user_id', $customer->id)
             ->where('otp', $request->otp)
             ->where('expires_at', '>=', Carbon::now())
             ->first();
         if ($otp) {
-            Auth::login($user);
+            Auth::login($customer);
             $otp->delete();
             return redirect()->route('home');
         }
