@@ -19,7 +19,8 @@ Route::get('/', function () {
 
 use App\Http\Controllers\OtpController;
 
-Route::get('/login', [OtpController::class, 'showLoginForm'])->middleware('throttle:2,1')->name('login');
+//Route::get('/login', [OtpController::class, 'showLoginForm'])->middleware('throttle:2,1')->name('login');
+Route::get('/login', [OtpController::class, 'showLoginForm'])->name('login');
 Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('otp.send');
 Route::get('/verify-otp', [OtpController::class, 'showOtpForm'])->name('otp.verify');
 Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('otp.check');
