@@ -9,10 +9,10 @@
     @csrf
     <input type="hidden" name="phone" value="{{ session('phone') }}">
     <label for="otp">OTP:</label>
-    <input type="number" name="otps[]">
-    <input type="number" name="otps[]">
-    <input type="number" name="otps[]">
-    <input type="number" name="otps[]">
+    <input type="text" name="otps[]">
+    <input type="text" name="otps[]">
+    <input type="text" name="otps[]">
+    <input type="text" name="otps[]">
     <button type="submit">Verify</button>
 </form>
 @if ($errors->any())

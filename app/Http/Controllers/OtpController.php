@@ -60,7 +60,8 @@ class OtpController extends Controller
 //            return redirect()->back()->withErrors(['email' => 'Email not found']);
 //        }
 //
-        return redirect()->route('otp.verify')->with('phone', $phone);
+        session()->put('phone', $phone);
+        return redirect()->route('otp.verify');
     }
 
     public function showOtpForm()
@@ -70,10 +71,14 @@ class OtpController extends Controller
 
     public function verifyOtp(Request $request)
     {
-        $request->validate([
-            'otps' => 'required|array',
-            'otps.*' => 'required|numeric|min:0|max:1',
-        ]);
+        // Kiểm tra nếu ít nhất một OTP không được nhập
+        $allFieldsFilled = !collect($request->input('otps'))->contains(function($field) {
+            return empty($field) || !is_numeric($field) || strlen($field) > 1;
+        });
+
+        if (!$allFieldsFilled) {
+            return back()->withErrors(['otps' => 'Phải nhập OTP và các input phải phải là số có duy nhất 1 ký tự']);
+        }
 
         $customer = Customer::where('email', $request->email)->first();
 
@@ -88,6 +93,7 @@ class OtpController extends Controller
         if ($otp) {
             Auth::login($customer);
             $otp->delete();
+            session()->forget('phone');
             return redirect()->route('home');
         }
 
