@@ -28,7 +28,7 @@ class CreateCustomersTable extends Migration
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
 
-            $table->foreign('rank_id')->references('ns_id')->on('ranks')->onDelete('set null');
+//            $table->foreign('rank_id')->references('ns_id')->on('ranks')->onDelete('set null');
         });
     }
 

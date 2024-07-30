@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOtpsTable extends Migration
+class CreateCustomerOtpsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,15 @@ class CreateOtpsTable extends Migration
      */
     public function up()
     {
-        Schema::create('otps', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('customer_otps', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('phone');
             $table->string('otp');
-            $table->string('ip_address');
+            $table->ipAddress('ip_address');
             $table->timestamp('expires_at');
             $table->timestamps();
+
+//            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -30,6 +32,6 @@ class CreateOtpsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('otps');
+        Schema::dropIfExists('customer_otps');
     }
 }
