@@ -53,13 +53,6 @@ class OtpController extends Controller
             ]);
         }
 
-
-
-//        $customer = Customer::where('email', $request->email)->first();
-//        if (!$customer) {
-//            return redirect()->back()->withErrors(['email' => 'Email not found']);
-//        }
-//
         session()->put('phone', $phone);
         return redirect()->route('otp.verify');
     }
