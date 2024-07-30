@@ -71,8 +71,8 @@ class OtpController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required',
+            'otps' => 'required|array',
+            'otps.*' => 'required|numeric|min:0|max:1',
         ]);
 
         $customer = Customer::where('email', $request->email)->first();
