@@ -10,13 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class OtpController extends Controller
 {
-    public function showLoginForm() {
+    public function showLoginForm()
+    {
         return view('auth.login');
     }
 
-    public function sendOtp(Request $request) {
+    public function sendOtp(Request $request)
+    {
         $request->validate([
-            'email' => 'required|email'
+            'phone' => [
+                'required',
+                'regex:/^(0[1-9][0-9]{8,9})$/',
+            ]
+        ], [
+            'phone.required' => 'Số điện thoại là bắt buộc.',
+            'phone.regex' => 'Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -35,11 +43,13 @@ class OtpController extends Controller
         return redirect()->route('otp.verify')->with('email', $request->email);
     }
 
-    public function showOtpForm() {
+    public function showOtpForm()
+    {
         return view('auth.verify-otp');
     }
 
-    public function verifyOtp(Request $request) {
+    public function verifyOtp(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required',

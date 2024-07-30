@@ -8,7 +8,7 @@
 <form method="POST" action="{{ route('otp.send') }}">
     @csrf
     <label for="phone">Phone:</label>
-    <input type="phone" name="phone" required>
+    <input type="phone" name="phone">
     <button type="submit">Send OTP</button>
 </form>
 @if ($errors->any())
